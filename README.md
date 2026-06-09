@@ -66,33 +66,33 @@ measures itself. (Count-only + sampled timing is the route to the dozen-cycle
 
 ## Quick start
 
-```bash
-# header-only runtime + RAII example
-g++ -O2 -std=c++17 -Iinclude -DPATHPROF_TIMING examples/itch-sim/main_raii.cpp -o sim -lrt
-./sim 2000000                 # prints top paths with per-segment histograms
-
-bash bench/bench.sh           # 4-way overhead table (clang)
-bash test/verify.sh           # cross-mechanism correctness gate
-
-# live readout from another terminal
-PATHPROF_SHM=/pp PATHPROF_LOOPS=200 ./sim 2000000 &   # producer exports to shm
-g++ -O2 -std=c++17 -Iinclude -DPATHPROF_TIMING tools/pathprof-top/pathprof-top.cpp -o pathprof-top -lrt
-./pathprof-top /pp --watch=500                        # external live view
-```
-
-Instrument your own code (RAII):
+Tag the hot functions with `PATHPROF`, reset the hash once per event, print at
+the end. That is the whole API.
 
 ```cpp
-#include "pathprof/raii.h"
-#include "pathprof/report.h"
+#include "pathprof/annotate.h"
 
-void parse(...) { PP_GATE("parse"); /* ... */ }   // at the top of each hot fn
+PATHPROF void parse(...) { /* ... */ }      // tag each function on the path
 
-// event loop:
-for (;;) { pathprof::on_root(); parse(next_event()); }
-// at shutdown (or on demand):
-pathprof::summary(20);
+for (;;) {
+    pathprof::on_root();                    // reset the running hash per event
+    parse(next_event());
+}
+pathprof::summary(20);                      // top paths + per-segment histograms
 ```
+
+```bash
+cd examples/itch-sim && ./build.sh && ./sim 2000000   # the worked example (clang)
+
+bash bench/bench.sh           # 4-way overhead table
+bash test/verify.sh           # cross-mechanism correctness gate
+```
+
+The `PATHPROF` attribute uses the Clang pass plugin. If you are not on Clang, or
+want a gate that inlines with zero toolchain support, the RAII front-end is one
+line: `#include "pathprof/raii.h"` then `PP_GATE("parse");` at the top of each
+function. Same runtime, same output. The other front-ends and the live
+shared-memory readout (`tools/pathprof-top`) are documented below.
 
 ## Design notes / honest caveats
 

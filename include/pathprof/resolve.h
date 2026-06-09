@@ -4,6 +4,7 @@
 #include "core.h"
 #include <dlfcn.h>
 #include <cxxabi.h>
+#include <cstdio>
 #include <cstdlib>
 #include <cstring>
 

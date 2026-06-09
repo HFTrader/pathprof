@@ -8,7 +8,7 @@ LLVM_CFG=${LLVM_CFG:-llvm-config-18}
 N=${1:-2000000}
 PIN=${PIN:-taskset -c 2}
 I="-O2 -std=c++17 -Iinclude -DPATHPROF_TIMING"
-E=examples/itch-sim
+E=bench/compare
 B=/tmp/ppbench
 mkdir -p $B
 

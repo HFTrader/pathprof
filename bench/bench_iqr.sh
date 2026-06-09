@@ -9,7 +9,7 @@ N=${1:-5000000}
 REPS=${REPS:-21}
 PIN=${PIN:-taskset -c 18}
 I="-O2 -std=c++17 -Iinclude -DPATHPROF_TIMING"
-E=examples/itch-sim
+E=bench/compare
 B=/tmp/ppbench; mkdir -p $B
 
 echo "host=$(hostname)  cpu=$(lscpu | awk -F: '/Model name/{gsub(/^ +/,"",$2);print $2; exit}')"

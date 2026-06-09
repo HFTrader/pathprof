@@ -9,7 +9,7 @@ CXX=${CXX:-clang++-18}
 LLVM_CFG=${LLVM_CFG:-llvm-config-18}
 N=${1:-500000}
 I="-O2 -std=c++17 -Iinclude -DPATHPROF_TIMING"
-E=examples/itch-sim
+E=bench/compare
 B=/tmp/ppverify; mkdir -p $B
 fail=0
 

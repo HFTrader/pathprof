@@ -4,6 +4,8 @@ build/
 *.a
 /tmp/
 sim_*
+examples/itch-sim/sim
+examples/itch-sim/PathProfPass.so
 *.profile
 xray-log.*
 perf.data*

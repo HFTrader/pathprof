@@ -20,7 +20,7 @@ add_library(pathprof::pathprof ALIAS pathprof)
 add_executable(pathprof-top tools/pathprof-top/pathprof-top.cpp)
 target_link_libraries(pathprof-top PRIVATE pathprof rt)
 
-# Clang pass plugin (front-end 4) -----------------------------------------
+# Clang pass plugin (the attribute front-end) -----------------------------
 if(PATHPROF_BUILD_PLUGIN)
     find_package(LLVM CONFIG)
     if(LLVM_FOUND)
@@ -34,13 +34,15 @@ if(PATHPROF_BUILD_PLUGIN)
     endif()
 endif()
 
-# example (RAII + baseline; the cyg/xray/plugin builds need front-end-specific
-# flags - see bench/bench.sh and test/verify.sh which drive the full matrix) --
-if(PATHPROF_BUILD_EXAMPLES)
-    add_executable(itch-raii     examples/itch-sim/main_raii.cpp)
-    add_executable(itch-baseline examples/itch-sim/main_baseline.cpp)
-    target_link_libraries(itch-raii     PRIVATE pathprof rt)
-    target_link_libraries(itch-baseline PRIVATE pathprof rt)
+# example: the attribute (PATHPROF) front-end, built with the pass plugin.
+# Needs Clang (the plugin is a Clang/LLVM pass). The four-way mechanism
+# comparison lives under bench/ and is driven by bench/bench.sh + test/verify.sh.
+if(PATHPROF_BUILD_EXAMPLES AND TARGET PathProfPass AND CMAKE_CXX_COMPILER_ID MATCHES "Clang")
+    add_executable(itch examples/itch-sim/sim.cpp)
+    add_dependencies(itch PathProfPass)
+    target_link_libraries(itch PRIVATE pathprof dl)
+    target_compile_options(itch PRIVATE -fpass-plugin=$<TARGET_FILE:PathProfPass>)
+    target_link_options(itch PRIVATE -rdynamic)
 endif()
 
 enable_testing()
